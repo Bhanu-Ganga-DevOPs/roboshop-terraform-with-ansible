@@ -46,6 +46,6 @@ database_servers = {
     instance_type = "t3.small"
     password      = "roboshop123"
   }
-
-  env = "dev"
 }
+
+env = "prod"
