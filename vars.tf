@@ -1,8 +1,5 @@
-
-variable "components" {
-  # default = ["frontend","user","catalogue","cart","shipping","payment","mongodb","mysql","redis","rabbitmq","dispatch"]
-}
-
 variable "env" {}
+variable "database_servers" {}
+variable "app_servers" {}
 
 
