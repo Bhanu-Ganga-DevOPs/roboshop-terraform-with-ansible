@@ -8,8 +8,11 @@ resource "aws_instance" "instance" {
   }
 }
 
+variable "app_type" {
+  default = ""
+}
 resource "null_resource" "provisioner" {
-  count        = var.provisioner ? 1 :0
+#  count        = var.provisioner ? 1 :0
   depends_on   = [aws_instance.instance, aws_route53_record.records]
   provisioner "remote-exec" {
 
@@ -20,12 +23,7 @@ resource "null_resource" "provisioner" {
       host     = aws_instance.instance.private_ip
     }
 
-    inline = [
-      "rm -rf roboshop-shell",
-      "git clone https://github.com/Bhanu-Ganga-DevOPs/roboshop-shell",
-      "cd roboshop-shell",
-      "sudo bash ${var.component_name}.sh ${var.password}"
-    ]
+    inline = var.application_type == "database" ? local.db_commands : local.app_commands
   }
 }
 
@@ -36,4 +34,55 @@ resource "aws_route53_record" "records" {
   type    = "A"
   ttl     = 30
   records = [aws_instance.instance.private_ip]
+}
+
+
+resource "aws_iam_role" "role" {
+  name = "${var.component_name}-${var.env}-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+    ]
+  })
+
+  tags = {
+    tag-key = "${var.component_name}-${var.env}-role"
+  }
+}
+
+resource "aws_iam_role_policy" "ssm_ps_policy" {
+  name = "${var.component_name}-${var.env}-ssm_ps_policy"
+  role = aws_iam_role.role.id
+
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "VisualEditor0",
+        "Effect": "Allow",
+        "Action": [
+          "ssm:GetParameterHistory",
+          "ssm:GetParametersByPath",
+          "ssm:GetParameters",
+          "ssm:GetParameter"
+        ],
+        "Resource": "arn:aws:ssm:us-east-1:555138969324:parameter/${var.env}.${var.component_name}.*"
+      },
+      {
+        "Sid": "VisualEditor1",
+        "Effect": "Allow",
+        "Action": "ssm:DescribeParameters",
+        "Resource": "*"
+      }
+    ]
+  })
 }
