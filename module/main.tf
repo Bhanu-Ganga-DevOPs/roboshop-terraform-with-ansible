@@ -81,7 +81,7 @@ resource "aws_iam_role_policy" "ssm_ps_policy" {
           "ssm:GetParameter"
         ],
         "Resource": [
-          "arn:aws:ssm:us-east-1:555138969324:parameter/dev.frontend.*",
+          "arn:aws:ssm:us-east-1:555138969324:parameter/${var.env}.${var.component_name}.*",
           "arn:aws:kms:us-east-1:555138969324:key/778981c1-c82b-4f3a-aa0e-91dedf2cc6da"
         ]
       }
