@@ -12,11 +12,15 @@ locals {
   ]
 
   db_tags = {
-    Name = "${var.component_name}.sh ${var.env}"
+    Name = "${var.component_name}-${var.env}"
   }
 
   app_tags = {
-    Name = "${var.component_name}.sh ${var.env}"
+    Name = "${var.component_name}-${var.env}"
     Monitor = "true"
+    component = var.component_name
+    env = var.env
+
+
   }
 }
